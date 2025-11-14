@@ -6,7 +6,7 @@ def pli(image):
     return plt.imshow(image.T,origin="lower")
 
 #%%
-def centered_autocorrelation(phase):
+def phase_structure_function(phase):
     '''Computes the centered autocorrelation from a given simulated phase screen which is used to compare and verify if the phase is Kolmogorov'''
 
     n = 100
@@ -60,7 +60,7 @@ auto_correlation = 0.0
 auto_norm = 0.0
 
 for i in range(no_screens):
-    phase_crop, auto, _, auto_normalized, Dphi = centered_autocorrelation(phase_screen_array[i])
+    phase_crop, auto, _, auto_normalized, Dphi = phase_structure_function(phase_screen_array[i])
 
     Dphi_avg = Dphi_avg + Dphi
     phase_screen_crop = phase_screen_crop + phase_crop
@@ -96,7 +96,7 @@ plt.colorbar(im3)
 
 plt.subplot(2, 2, 4)
 im4 = pli(Dphi)
-plt.title("Centered Autocorrelation")
+plt.title("Phase Structure Function D$\phi$")
 plt.colorbar(im4)
 
 plt.tight_layout()

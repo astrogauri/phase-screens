@@ -7,7 +7,8 @@ def pli(image):
 
 #%%
 def covariance_function(phase):
-    '''Computes the covariance of the phase derivative from a given simulated phase screen'''
+    '''Computes the covariance of the phase derivative from a given simulated phase screen. 
+       Covariance of the phase derivative is related to the phase structure function.'''
 
     n = 100
     # Cropping phase screen 
@@ -69,11 +70,11 @@ r = np.sqrt(X**2 + Y**2)
 covariance_theoretical = 5/(3*r**(1/3))-5*X**2/(9*r**(7/3))
 
 plt.figure()
-plt.scatter(r, cov.flatten(), s=1, label='experimental')
-plt.scatter(r, covariance_theoretical.flatten()/150, s=1, color='r', label='theoretical')
-plt.xlabel("Radial Distance r")
-plt.ylabel("Covariance of Phase Derivative")
+#plt.scatter(r,cov.flatten() , s=1, label='experimental')
+#plt.scatter(r, covariance_theoretical.flatten()/150, s=1, color='r', label='theoretical')
+plt.scatter(cov.flatten(),covariance_theoretical.flatten(), s=1)
+#plt.xlabel("Radial Distance r")
+#plt.ylabel("Covariance of Phase Derivative")
 plt.legend()
 plt.show()
 
-# %%
