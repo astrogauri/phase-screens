@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
+from scipy import stats
 
 #%%
 def pli(image):
@@ -51,7 +51,7 @@ def phase_gradient_vector_cov(phase):
 #%%
 # Simulated phase screen for testing. We take multiple phase screens to average the covariance.
 phase_screen_array = []
-no_screens = 10
+no_screens = 50
 
 # Generating multiple phase screens
 for i in range(no_screens):
@@ -68,26 +68,46 @@ for i in range(no_screens):
 cov = cov / no_screens
 
 #%%
-pli(cov)
-
-
+# Creating r values
 n = 100
 tmp = np.arange(n) - n//2
 X, Y = np.meshgrid(tmp, tmp, indexing='ij')
 r = np.sqrt(X**2 + Y**2)
-
-plt.figure()
-plt.scatter(r.flatten(), cov.flatten(), s=1)
-plt.xlabel("r")
-plt.ylabel("Covariance of phase gradient vector")
-plt.show()
+print(r)
 
 # %%
+# This terms comes from the second derivative of the phase structure function
 
-lin_reg = LinearRegression.fit(np.log(cov.flatten()),  np.log(r.flatten()))
-print("Slope from linear regression (log-log scale): ", lin_reg.coef_)
+def laplacian_dphi(r):
+    return (25/9) * r**(-1/3)
 
-# Theoretical slope for Kolmogorov turbulence is -5/3
-theoretical_slope = -5/3
-print("Theoretical slope: ", theoretical_slope)
+K =  5.3e-3
+plt.scatter(r.flatten(),  cov.flatten(), s=1, color='b' )  # plot your data points
+plt.plot(r.flatten(), K * laplacian_dphi(r.flatten()),  linewidth=0.6, color='r' )  # overplot the theory
+plt.loglog()
 
+# %%
+mask = (r > 0) & (r < 100)
+r = r[mask]
+cov = cov[mask]
+
+slope, intercept, _, _, _ = stats.linregress(np.log(r.flatten()), np.log(cov.flatten()))
+print("Slope from linear regression: ", slope)
+print("Intercept from linear regression: ", intercept)
+
+
+y_fit = np.exp(intercept + slope * np.log(r.flatten()))
+
+#K = np.exp(intercept)
+
+
+plt.figure()
+plt.scatter(r.flatten(), cov.flatten(), s=1, label="Data")
+plt.plot(r.flatten(), y_fit, color='red', label="Fit")
+
+plt.xlabel("r")
+plt.ylabel("Covariance of phase gradient vector")
+plt.loglog()
+plt.legend()
+
+# %%
