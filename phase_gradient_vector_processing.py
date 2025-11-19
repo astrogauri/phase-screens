@@ -82,12 +82,12 @@ def laplacian_dphi(r):
     return (25/9) * r**(-1/3)
 
 K =  5.3e-3
-plt.scatter(r.flatten(),  cov.flatten(), s=1, color='b' )  # plot your data points
-plt.plot(r.flatten(), K * laplacian_dphi(r.flatten()),  linewidth=0.6, color='r' )  # overplot the theory
+plt.scatter(r.flatten(),  cov.flatten(), s=1, color='b' )  
+plt.plot(r.flatten(), K * laplacian_dphi(r.flatten()),  linewidth=0.6, color='r' )  
 plt.loglog()
 
 # %%
-mask = (r > 0) & (r < 100)
+mask = (r > 0) & (r < 5)
 r = r[mask]
 cov = cov[mask]
 
