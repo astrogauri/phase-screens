@@ -23,8 +23,8 @@ no_phase = mean_frames(path + f_list[1]) - bg
 phase_screen = mean_frames(path + f_list[2]) - bg
 
 # Coordinates to determine mask radius for C circle
-x = 315.4 - 93.8
-y = 120.6 - 100.4
+x = 315 - 94
+y = 121 - 100
 D = np.sqrt(x**2 + y**2)
 r = D/2 - 20
 
@@ -44,6 +44,60 @@ def meshgrid(nx, ny, center_x, center_y, shift_x, shift_y):
     return xx, yy
 
 
+# C
+xx_c, yy_c = meshgrid(nx, ny, x0, y0, 0, 0)
+mask_c = np.sqrt(xx_c**2 + yy_c**2) < r # selects all pixels within a circle of radius r around that center
+
+just_new_c = np.ones((nx, ny))
+just_new_c[mask_c] = phase_screen[mask_c] # is an image where only the pixels inside C are kept from phase_screen, everything else is one
+
+
+X = int(4*r)
+Y = int(4*r)
+
+x_dim = np.ones(X)
+y_dim = np.ones(Y)
+
+img = np.meshgrid(x_dim, y_dim, indexing='ij')
+
+
+img =  phase_screen[mask_c]
+pli(img)
+
+
+
+# We reshape the image to 2 times the diameter of mask circle 
+# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def recenter(img, old_cx, old_cy, new_cx, new_cy):
     ''' Each just_new_* image has its non-zero pixels located at a different position on the 2D array.
     For gradient calculations we want all four images aligned on a common coordinate system. This function
@@ -55,12 +109,7 @@ def recenter(img, old_cx, old_cy, new_cx, new_cy):
     shift_y = int(new_cy - old_cy)
     return np.roll(np.roll(img, shift_x, axis=0), shift_y, axis=1)
 
-# C
-xx_c, yy_c = meshgrid(nx, ny, x0, y0, 0, 0)
-mask_c = np.sqrt(xx_c**2 + yy_c**2) < r # selects all pixels within a circle of radius r around that center
 
-just_new_c = np.ones((nx, ny))
-just_new_c[mask_c] = phase_screen[mask_c] # is an image where only the pixels inside C are kept from phase_screen, everything else is one
 
 # D
 shift_pix_x_d = 499 - 210
@@ -73,8 +122,8 @@ just_new_d = np.ones((nx, ny))
 just_new_d[mask_d] = phase_screen[mask_d]
 
 # A
-shift_pix_x_a = 211.2 - 209.8
-shift_pix_y_a = 373.6 - 109.4
+shift_pix_x_a = 211 - 210
+shift_pix_y_a = 374 - 109
 
 xx_a, yy_a = meshgrid(nx, ny, x0, y0, shift_pix_x_a, shift_pix_y_a)
 mask_a = np.sqrt(xx_a**2 + yy_a**2) < r
@@ -84,14 +133,16 @@ just_new_a[mask_a] = phase_screen[mask_a]
 
 
 # B
-shift_pix_x_b = 472.9 - 209.8
-shift_pix_y_b = 373.6 - 109.4
+shift_pix_x_b = 473 - 210
+shift_pix_y_b = 374 - 109
 
 xx_b, yy_b = meshgrid(nx, ny, x0, y0, shift_pix_x_b, shift_pix_y_b)
 mask_b = np.sqrt(xx_b**2 + yy_b**2) < r
 
 just_new_b = np.ones((nx, ny))
 just_new_b[mask_b] = phase_screen[mask_b]
+
+
 
 # Recentering all to C center coordinate to be able to calculate gradients
 center_ref_x = x0              
