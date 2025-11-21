@@ -84,6 +84,10 @@ plt.title('Phase Gradient in Y')
 plt.colorbar()
 plt.show()
 
+#%%
+# Save the phase vector gradient 
+# saving as .npz file (numpy compressed format)
+np.savez("gradients_xy.npz", gradX=grad_imgX, gradY=grad_imgY)
 
 #%%
 
