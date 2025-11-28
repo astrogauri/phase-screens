@@ -54,12 +54,13 @@ phase_screen_array = []
 no_screens = 50
 
 # Generating multiple phase screens
+N=2048
+ncrop = 200
+x = np.arange(N)-N//2
+k2 = np.fft.fftshift(x[None,:]**2 + x[:,None]**2) + 1.0
 for i in range(no_screens):
-    N=200
-    x = np.arange(N)-N//2
-    k2 = np.fft.fftshift(x[None,:]**2 + x[:,None]**2) + 1.0
     phase_img = np.fft.fft2(k2**(-11/12) * np.exp(2j*np.pi*np.random.rand(N,N))).real 
-    phase_screen_array.append(phase_img)
+    phase_screen_array.append(phase_img[0:ncrop,0:ncrop])
 
 cov = 0.0
 for i in range(no_screens):
@@ -67,13 +68,14 @@ for i in range(no_screens):
     cov = cov + covariance
 cov = cov / no_screens
 
+pli(cov)
+
 #%%
 # Creating r values
 n = 100
 tmp = np.arange(n) - n//2
 X, Y = np.meshgrid(tmp, tmp, indexing='ij')
 r = np.sqrt(X**2 + Y**2)
-print(r)
 
 # %%
 # This terms comes from the second derivative of the phase structure function
@@ -87,7 +89,7 @@ plt.plot(r.flatten(), K * laplacian_dphi(r.flatten()),  linewidth=0.6, color='r'
 plt.loglog()
 
 # %%
-mask = (r > 0) & (r < 5)
+mask = (r > 0) & (r < 20)
 r = r[mask]
 cov = cov[mask]
 
