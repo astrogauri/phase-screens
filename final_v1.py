@@ -207,8 +207,8 @@ def fit_linear(r, cov):
     return y_fit.reshape(r.shape), slope, intercept
 
 # Extracting the interest region of the covariances
-
-mask = (r > 0) & (r < 53)
+r_limit = np.max(r)
+mask = (r > 0) & (r < r_limit)
 r_section = r[mask]
 cov_interest_theoric = cov_theoric[mask] 
 #cov_interest_theoric = cov_interest_theoric + np.max(cov_interest_theoric)*0.25
@@ -245,14 +245,14 @@ plt.show()
 
 # Define ranges
 limit_r_values = range(1, 100)
-constant_factor_values = range(-100, 100)
+constant_factor_values = range(-200, 0)
 
 # Create storage matrix
 slope_matrix = np.zeros((len(limit_r_values), len(constant_factor_values)))
 
 # Convert ranges to list to allow indexing
-limit_r_list = list(limit_r_values)
-constant_factor_list = list(constant_factor_values)
+limit_r_list = np.linspace(1, 100, 50)
+constant_factor_list = np.linspace(-0.02, 0.01, 50)
 
 # 2D loop
 for i, limit_r in enumerate(limit_r_list):
@@ -260,33 +260,61 @@ for i, limit_r in enumerate(limit_r_list):
         
         mask = (r > 0) & (r < limit_r) 
         r_boucle = r[mask]
-        cov_boucle = cov_theoric[mask]
-        k = constant_factor/10000
-        cov_boucle = cov_boucle + k #np.max(cov_boucle) * (constant_factor / 100)
-        
+        cov_boucle = cov_theoric[mask] + constant_factor
+
         
         # linear regression
         y_fit, slope, intercept = fit_linear(r_boucle, cov_boucle)
-        '''if round(slope,2) < -0.32 and round(slope,2) > -0.34:
+        '''
+        if round(slope,2) < -0.32 and round(slope,2) > -0.34:
             plt.scatter(r_boucle.flatten(),  cov_boucle.flatten(), s=1, color='b', label = "Theoric simulated turbulence" )
             plt.plot(r_boucle.flatten(), y_fit, color='blue', label="Theoric Fit, slope={:.2f}".format(slope))
             plt.loglog()
             plt.legend(loc='lower left', fontsize=6)
-            plt.show()'''
+            plt.show()
+        '''
         # store in matrix
         slope_matrix[i, j] = slope
          
 
 mask_valid = (slope_matrix >= -2/3) & (slope_matrix <= 0)
 slope_matrix_filtered = np.where(mask_valid, slope_matrix, np.nan)
-#slope_matrix_filtered = slope_matrix.copy()
+slope_matrix_filtered = slope_matrix.copy()
 
 # Plot heatmap of k as function of limit_r 
 plt.figure(figsize=(10, 6))
-plt.imshow(slope_matrix_filtered.T, extent=[min(limit_r_values), max(limit_r_values), min(constant_factor_values)/10000, max(constant_factor_values)/10000], aspect='auto', cmap='viridis')
+plt.imshow(slope_matrix_filtered.T, extent=[min(limit_r_values), max(limit_r_values), min(constant_factor_values), max(constant_factor_values)], aspect='auto', cmap='viridis')
 
 plt.colorbar(label="Slope value")
 plt.title("Slope as function of limit_r and constant_factor for restricted values, With a mask to select only slope [0, -2/3], on a 336*336 image")
 plt.ylabel("constant k added to covariance")
 plt.xlabel("limit_r")
+limit_r_list = np.array(limit_r_list)
+constant_factor_list = np.array(constant_factor_list)/10000
+plt.contour(limit_r_list, constant_factor_list, slope_matrix_filtered.T, levels = [-1/3])
 plt.show()
+
+'''
+#Ponderation of the covariance : 
+r_flat = r.flatten()
+cov_flat = cov_theoric.flatten()
+
+# Find all unique radii (float values)
+unique_r, inverse_idx = np.unique(r_flat, return_inverse=True)
+
+# Sum covariance for each unique radius
+sums = np.bincount(inverse_idx, weights=cov_flat)
+
+# Count number of pixels for each radius
+counts = np.bincount(inverse_idx)
+
+# Avoid division by zero
+radial_profile = sums / np.maximum(counts, 1)
+
+# Plot
+plt.scatter(unique_r, radial_profile)
+plt.xscale("log")
+plt.yscale("log")
+plt.title("Radial average (float radii)")
+plt.show()
+'''
